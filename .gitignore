@@ -1,9 +1,6 @@
 # configs
 config.py
 
-# features in active development
-beta.py
-
 # test files
 test.py
 
