@@ -1,13 +1,10 @@
-import sqlite3
-import pycbrf
 import datetime
-from aiogram import Bot, Dispatcher, executor, types
-from aiogram.types import InlineQuery, \
-    InlineQueryResultArticle
-from pycbrf import ExchangeRates
-import sqlite3
 import logging
-import hashlib
+import sqlite3
+
+from aiogram import Bot, Dispatcher, executor, types
+from pycbrf import ExchangeRates
+
 import config
 
 logging.basicConfig(level=logging.INFO)
@@ -48,7 +45,7 @@ async def process_start_command(message: types.Message):
 
     if message.from_user.username is None:
         await message.reply("Привет! Я бот, который умеет переводить валюту по курсам, установленными Центробанком "
-                            "России.\n\nНапиши /transfer и необходимую валюту ($, "
+                            "России.\n\nНапиши <code>/transfer</code> и необходимую валюту ($, "
                             "€, "
                             "£, ₽ или ¥),\nНапример: <code>/transfer 100$</code> (или $100).\n\nЕсли что ¥ - китайский "
                             "юань, не путать "
@@ -56,7 +53,7 @@ async def process_start_command(message: types.Message):
         await message.answer("""Дорогой пользователь, я не могу определить твой никнейм. Пожалуйста, установи никнейм в настройках аккаунта, иначе я не смогу сохранить твои данные в базе данных\n\nP.S. Я не шпион, подосланный Пентагоном (@andr4yka, автор этого бота, тоже не шпион), и я не собираюсь отслеживать твои действия и отсылать их на куда-либо. Я просто бот, который хочет помочь тебе с конвертацией валют.\n\nP.P.S И да, каждый раз когда ты будешь писать мне /start, я буду тебе напоминать о том, что ты не установил никнейм (пока ты его не установишь).\n\nУ тебя есть удивительная возможность поблагодарить разработчика за это напоминание, написав ему в личку пару приятных слов.""")
     else:
         await message.reply("Привет! Я бот, который умеет переводить валюту по курсам, установленными Центробанком "
-                            "России.\n\nНапиши /transfer и необходимую валюту ($, "
+                            "России.\n\nНапиши <code>/transfer</code> и необходимую валюту ($, "
                             "€, "
                             "£, ₽ или ¥),\nНапример: <code>/transfer 100$</code> (или $100).\n\nЕсли что ¥ - китайский "
                             "юань, не путать "
@@ -68,11 +65,18 @@ async def process_start_command(message: types.Message):
 
 @dp.message_handler(content_types=['new_chat_members'])
 async def send_welcome(message: types.Message):
-    bot_obj = await bot.get_me()
-    bot_id = bot_obj.id
+    bot.obj = await bot.get_me()
+    bot.id = bot.obj.id
     for chat_member in message.new_chat_members:
-        if chat_member.id == bot_id:
-            await message.answer("""""")
+        if chat_member.id == bot.id:
+            await message.answer("Привет! Я бот, который умеет переводить валюту по курсам, установленными Центробанком"
+                                 "России.\n\nНапиши <code>/transfer</code> и необходимую валюту ($, "
+                                 "€, "
+                                 "£, ₽ или ¥),\nНапример: <code>/transfer 100$</code> (или $100).\n\nЕсли что ¥ - китайский "
+                                 "юань, не путать "
+                                 "с японской иеной\n\nО всех технических неполадках "
+                                 "пиши "
+                                 "@andr4yka")
 
 
 @dp.message_handler(commands=['transfer'])
@@ -91,6 +95,24 @@ async def process_transfer_command(message: types.Message):
         await message.reply(await yuan())
     else:
         await message.reply('Отсутствует валюта, проверьте правильность ввода')
+
+    connec = sqlite3.connect('users.db')
+    cursor = connec.cursor()
+
+    cursor.execute(f"""CREATE TABLE IF NOT EXISTS users(
+        username NOT NULL,
+        user_id INTEGER
+        )""")
+
+    connec.commit()
+
+    user_id = [message.from_user.id]
+    cursor.execute(f"SELECT user_id FROM users WHERE user_id = '{user_id}'")
+    if cursor.fetchone() is None:
+        cursor.execute(f"INSERT INTO users VALUES('{message.from_user.username}', '{message.from_user.id}')")
+        connec.commit()
+    else:
+        pass
 
 
 async def rubles():
