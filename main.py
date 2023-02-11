@@ -1,6 +1,5 @@
 import datetime
 import logging
-import sqlite3
 
 from aiogram import Bot, Dispatcher, executor, types
 from pycbrf import ExchangeRates
@@ -26,11 +25,12 @@ b = ['$', '€', '£', '₽', '¥']
 @dp.message_handler(commands=['start'])
 async def process_start_command(message: types.Message):
     file = open('users.txt', 'r', encoding='utf-8')
-    if f"{message.from_user.username} ({message.from_user.id})" in file.read():
+    if f"{message.from_user.username} (https://web.telegram.org/z/#{message.from_user.id})" in file.read():
         pass
     else:
         with open('users.txt', 'a', encoding='utf-8') as file:
-            file.write(f"{message.from_user.username} ({message.from_user.id})\n")
+            file.write(f"{message.from_user.username} (https://web.telegram.org/z/#{message.from_user.id})\n")
+
     await message.reply("Привет! Я бот, который умеет переводить валюту по курсам, установленными Центробанком "
                         "России.\n\nНапиши <code>/transfer</code> и необходимую валюту (<code>$</code>, "
                         "<code>€</code>, "
@@ -75,30 +75,11 @@ async def process_transfer_command(message: types.Message):
         await message.reply('Отсутствует валюта, проверьте правильность ввода')
 
     file = open('users.txt', 'r', encoding='utf-8')
-    if f"{message.from_user.username} ({message.from_user.id})" in file.read():
+    if f"{message.from_user.username} (https://web.telegram.org/z/#{message.from_user.id})" in file.read():
         pass
     else:
         with open('users.txt', 'a', encoding='utf-8') as file:
             file.write(f"{message.from_user.username} (https://web.telegram.org/z/#{message.from_user.id})\n")
-
-
-#    connec = sqlite3.connect('users.db')
-#    cursor = connec.cursor()
-
-#    cursor.execute(f"""CREATE TABLE IF NOT EXISTS users(
-#        username NOT NULL,
-#        user_id INTEGER
-#        )""")
-
-#    connec.commit()
-#
-#    user_id = [message.from_user.id]
-#    cursor.execute(f"SELECT user_id FROM users WHERE user_id = '{user_id}'")
-#    if cursor.fetchone() is None:
-#        cursor.execute(f"INSERT INTO users VALUES('{message.from_user.username}', '{message.from_user.id}')")
-#        connec.commit()
-#    else:
-#        pass
 
 
 async def rubles():
