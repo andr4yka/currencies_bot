@@ -1,11 +1,14 @@
 # configs
 config.py
 
+users.txt
+!/users.txt!/users.txt
+
 # test files
 test.py
 
 # Byte-compiled / optimized / DLL files
-__pycache__/
+__pycache__/__pycache__/
 *.py[cod]
 *$py.class
 
@@ -154,6 +157,4 @@ cython_debug/
 config.cfg
 
 # database files
-users.db
-users.txt
-!/users.txt
+users.db!/users.txt
