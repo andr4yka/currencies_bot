@@ -25,43 +25,20 @@ b = ['$', '€', '£', '₽', '¥']
 
 @dp.message_handler(commands=['start'])
 async def process_start_command(message: types.Message):
-    connec = sqlite3.connect('users.db')
-    cursor = connec.cursor()
-
-    cursor.execute(f"""CREATE TABLE IF NOT EXISTS users(
-        username NOT NULL,
-        user_id INTEGER
-        )""")
-
-    connec.commit()
-
-    user_id = [message.from_user.id]
-    cursor.execute(f"SELECT user_id FROM users WHERE user_id = '{user_id}'")
-    if cursor.fetchone() is None:
-        cursor.execute(f"INSERT INTO users VALUES('{message.from_user.username}', '{message.from_user.id}')")
-        connec.commit()
-    else:
+    file = open('users.txt', 'r', encoding='utf-8')
+    if f"{message.from_user.username} ({message.from_user.id})" in file.read():
         pass
-
-    if message.from_user.username is None:
-        await message.reply("Привет! Я бот, который умеет переводить валюту по курсам, установленными Центробанком "
-                            "России.\n\nНапиши <code>/transfer</code> и необходимую валюту ($, "
-                            "€, "
-                            "£, ₽ или ¥),\nНапример: <code>/transfer 100$</code> (или $100).\n\nЕсли что ¥ - китайский "
-                            "юань, не путать "
-                            "с японской иеной.")
-        await message.answer(
-            """Дорогой пользователь, я не могу определить твой никнейм. Пожалуйста, установи никнейм в настройках аккаунта, иначе я не смогу сохранить твои данные в базе данных\n\nP.S. Я не шпион, подосланный Пентагоном (@andr4yka, автор этого бота, тоже не шпион), и я не собираюсь отслеживать твои действия и отсылать их на куда-либо. Я просто бот, который хочет помочь тебе с конвертацией валют.\n\nP.P.S И да, каждый раз когда ты будешь писать мне /start, я буду тебе напоминать о том, что ты не установил никнейм (пока ты его не установишь).\n\nУ тебя есть удивительная возможность поблагодарить разработчика за это напоминание, написав ему в личку пару приятных слов.""")
     else:
-        await message.reply("Привет! Я бот, который умеет переводить валюту по курсам, установленными Центробанком "
-                            "России.\n\nНапиши <code>/transfer</code> и необходимую валюту ($, "
-                            "€, "
-                            "£, ₽ или ¥),\nНапример: <code>/transfer 100$</code> (или $100).\n\nЕсли что ¥ - китайский "
-                            "юань, не путать "
-                            "с японской иеной\n\nО всех технических неполадках "
-                            "пиши "
-                            "@andr4yka")
-    connec.close()
+        with open('users.txt', 'a', encoding='utf-8') as file:
+            file.write(f"{message.from_user.username} ({message.from_user.id})\n")
+    await message.reply("Привет! Я бот, который умеет переводить валюту по курсам, установленными Центробанком "
+                        "России.\n\nНапиши <code>/transfer</code> и необходимую валюту (<code>$</code>, "
+                        "<code>€</code>, "
+                        "<code>£</code>, <code>₽</code> или <code>¥</code>),\nНапример: <code>/transfer 100$</code> (или $100).\n\nЕсли что ¥ - китайский "
+                        "юань, не путать "
+                        "с японской иеной\n\nО всех технических неполадках "
+                        "пиши "
+                        "@andr4yka")
 
 
 @dp.message_handler(content_types=['new_chat_members'])
@@ -97,35 +74,43 @@ async def process_transfer_command(message: types.Message):
     else:
         await message.reply('Отсутствует валюта, проверьте правильность ввода')
 
-    connec = sqlite3.connect('users.db')
-    cursor = connec.cursor()
-
-    cursor.execute(f"""CREATE TABLE IF NOT EXISTS users(
-        username NOT NULL,
-        user_id INTEGER
-        )""")
-
-    connec.commit()
-
-    user_id = [message.from_user.id]
-    cursor.execute(f"SELECT user_id FROM users WHERE user_id = '{user_id}'")
-    if cursor.fetchone() is None:
-        cursor.execute(f"INSERT INTO users VALUES('{message.from_user.username}', '{message.from_user.id}')")
-        connec.commit()
-    else:
+    file = open('users.txt', 'r', encoding='utf-8')
+    if f"{message.from_user.username} ({message.from_user.id})" in file.read():
         pass
+    else:
+        with open('users.txt', 'a', encoding='utf-8') as file:
+            file.write(f"{message.from_user.username} (https://web.telegram.org/z/#{message.from_user.id})\n")
+
+
+#    connec = sqlite3.connect('users.db')
+#    cursor = connec.cursor()
+
+#    cursor.execute(f"""CREATE TABLE IF NOT EXISTS users(
+#        username NOT NULL,
+#        user_id INTEGER
+#        )""")
+
+#    connec.commit()
+#
+#    user_id = [message.from_user.id]
+#    cursor.execute(f"SELECT user_id FROM users WHERE user_id = '{user_id}'")
+#    if cursor.fetchone() is None:
+#        cursor.execute(f"INSERT INTO users VALUES('{message.from_user.username}', '{message.from_user.id}')")
+#        connec.commit()
+#    else:
+#        pass
 
 
 async def rubles():
     # Проверка на корректное наличие валюты
-    yes = 0
+    err = 0
     for i in a:
         if i == b[3]:
-            yes += 1
+            err += 1
         else:
             continue
 
-    if yes > 1:
+    if err > 1:
         result = 'Слишком много ₽, проверьте правильность ввода'
         return result
 
@@ -173,14 +158,14 @@ async def dollars():
 
 async def euros():
     # Проверка на корректное наличие валюты
-    yes = 0
+    err = 0
     for i in a:
         if i == '€':
-            yes += 1
+            err += 1
         else:
             continue
 
-    if yes > 1:
+    if err > 1:
         return 'Слишком много €, проверьте правильность ввода'
     if a[0] == '€':
         try:
@@ -202,14 +187,14 @@ async def euros():
 
 async def pounds():
     # Проверка на корректное наличие валюты
-    yes = 0
+    err = 0
     for i in a:
         if i == '£':
-            yes += 1
+            err += 1
         else:
             continue
 
-    if yes > 1:
+    if err > 1:
         return 'Слишком много £, проверьте правильность ввода'
 
     if a[0] == '£':
@@ -232,14 +217,14 @@ async def pounds():
 
 async def yuan():
     # Проверка на корректное наличие валюты
-    yes = 0
+    err = 0
     for i in a:
         if i == '¥':
-            yes += 1
+            err += 1
         else:
             continue
 
-    if yes > 1:
+    if err > 1:
         result = 'Слишком много ¥, проверьте правильность ввода'
         return result
 
@@ -247,7 +232,7 @@ async def yuan():
         try:
             yuan = int(a[1:])
             znach = yuan * cny
-            result = f"{a} = {round(znach, 2)}₽\n{a} = {round(znach / usd, 2)}$\n{a} = {round(znach / eur, 2)}€\n{a} = {round(znach / gbp, 2)}£ "
+            result = f"{a} = {round(znach , 2)}₽\n{a} = {round(znach / usd, 2)}$\n{a} = {round(znach / eur, 2)}€\n{a} = {round(znach / gbp, 2)}£ "
             return result
 
         except ValueError:
@@ -257,7 +242,7 @@ async def yuan():
         try:
             yuan = int(a[:-1])
             znach = yuan * cny
-            result = f"{a} = {round(znach / 10, 2)}₽\n{a} = {round(znach / 10 / usd, 2)}$\n{a} = {round(znach / 10 / eur, 2)}€\n{a} = {round(znach / 10 / gbp, 2)}£ "
+            result = f"{a} = {round(znach, 2)}₽\n{a} = {round(znach / usd, 2)}$\n{a} = {round(znach / eur, 2)}€\n{a} = {round(znach / gbp, 2)}£ "
             return result
         except ValueError:
             result = 'Ошибка ввода'

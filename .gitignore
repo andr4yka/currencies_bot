@@ -155,6 +155,7 @@ config.cfg
 
 # database files
 users.db
+users.txt
 
 
 # PyCharm
