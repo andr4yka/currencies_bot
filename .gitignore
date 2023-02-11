@@ -1,6 +1,9 @@
 # configs
 config.py
 
+users.txt
+!/users.txt!/users.txt
+
 # test files
 test.py
 
@@ -155,5 +158,3 @@ config.cfg
 
 # database files
 users.db
-users.txt
-!/users.txt
