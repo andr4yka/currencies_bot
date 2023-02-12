@@ -19,7 +19,7 @@ eur = rates['EUR'].value
 gbp = rates['GBP'].value
 cny = rates['CNY'].value
 
-b = ['$', '€', '£', '₽', '¥']
+values_list = ['$', '€', '£', '₽', '¥']
 
 
 @dp.message_handler(commands=['start'])
@@ -47,7 +47,7 @@ async def send_welcome(message: types.Message):
     bot.id = bot.obj.id
     for chat_member in message.new_chat_members:
         if chat_member.id == bot.id:
-            await message.answer("Привет! Я бот, который умеет переводить валюту по курсам, установленными Центробанком"
+            await message.answer("Привет! Спасибо, что добавили меня в эту беседу!\nЯ бот, который умеет переводить валюту по курсам, установленными Центробанком"
                                  "России.\n\nНапиши <code>/transfer</code> и необходимую валюту ($, "
                                  "€, "
                                  "£, ₽ или ¥),\nНапример: <code>/transfer 100$</code> (или $100).\n\nЕсли что ¥ - китайский "
@@ -61,15 +61,15 @@ async def send_welcome(message: types.Message):
 async def process_transfer_command(message: types.Message):
     global a
     a = message.text[10:]  # Обрезаем команду /transfer
-    if b[0] in a:
+    if values_list[0] in a:
         await message.reply(await dollars())
-    elif b[1] in a:
+    elif values_list[1] in a:
         await message.reply(await euros())
-    elif b[2] in a:
+    elif values_list[2] in a:
         await message.reply(await pounds())
-    elif b[3] in a:
+    elif values_list[3] in a:
         await message.reply(await rubles())
-    elif b[4] in a:
+    elif values_list[4] in a:
         await message.reply(await yuan())
     else:
         await message.reply('Отсутствует валюта, проверьте правильность ввода')
@@ -86,7 +86,7 @@ async def rubles():
     # Проверка на корректное наличие валюты
     err = 0
     for i in a:
-        if i == b[3]:
+        if i == values_list[3]:
             err += 1
         else:
             continue
@@ -117,7 +117,7 @@ async def rubles():
 
 async def dollars():
     # Проверка на корректное наличие валюты
-    if a[0] == b[0]:
+    if a[0] == values_list[0]:
         try:
             doll = int(a[1:])
             znach = doll * usd
@@ -126,7 +126,7 @@ async def dollars():
         except ValueError:
             result = 'Ошибка ввода'
             return result
-    elif a[-1] == b[0]:
+    elif a[-1] == values_list[0]:
         try:
             doll = int(a[:-1])
             znach = doll * usd
